@@ -1,0 +1,19 @@
+.body{
+    text-align: center;
+    padding: 30px;
+    color: #FFFFFF;
+}
+
+.line {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    width: 300px;
+    border-top: 1px solid #FFFFFF;
+}
+
+.line-div{
+    display: flex;
+    justify-content: space-between; 
+    padding:10px;
+}

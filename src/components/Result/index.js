@@ -3,7 +3,7 @@ import DoneIcon from "@mui/icons-material/Done";
 
 function Result() {
   return (
-    <div className="body">
+    <div className="body" style={{ marginTop: "-55px" }}>
       <h3>Results</h3>
       <section className="line"></section>
       <div className="line-div">

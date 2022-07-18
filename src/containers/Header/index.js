@@ -9,7 +9,7 @@ function Header() {
       </div>
       <div className="header-sub">
         <div className="button-div">
-          <Button
+          {/* <Button
             className="header-sub-text"
             style={{
               color: "#FFFFFF",
@@ -28,7 +28,7 @@ function Header() {
             }}
           >
             ASSESS DAMAGE
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>

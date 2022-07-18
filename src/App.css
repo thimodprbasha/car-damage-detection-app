@@ -1,21 +1,39 @@
 .App {
-  background: linear-gradient(122.06deg, #0C3E66 22.68%, #FA057E 123.14%);
+  background: linear-gradient(122.06deg, #0c3e66 22.68%, #fa057e 123.14%);
   height: 100vh;
   width: 100%;
 }
 
-.body-div{
+.body-div {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.button-upload{
+.button-upload {
+  justify-content: center;
   display: flex;
-  padding: 25px
+  padding: 25px;
 }
 
-.button-upload-upload{
+.button-upload-upload {
   margin-right: 30px;
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #f3f3f3; /* Light grey */
+  border-top: 3px solid #383636; /* Black */
+  border-radius: 50%;
+  animation: spinner 1.5s linear infinite;
 }

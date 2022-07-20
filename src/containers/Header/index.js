@@ -3,35 +3,17 @@ import Button from "@mui/material/Button";
 
 function Header() {
   return (
-    <div className="header">
-      <div className="header-main">
-        <span className="header-main-text">CAR DAMAGE DETECTIVE</span>
-      </div>
-      <div className="header-sub">
-        <div className="button-div">
-          {/* <Button
-            className="header-sub-text"
-            style={{
-              color: "#FFFFFF",
-              fontSize: "18px",
-            }}
-          >
-            HOW IT WORKS
-          </Button>
+    <header class="header sticky-top">
+      <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 shadow-sm">
+        <div class="container">
+          <a class="navbar-brand">
+            <strong class="h6 mb-0 font-weight-bold text-uppercase">
+              Car Damage Assessment
+            </strong>
+          </a>
         </div>
-        <div className="button-div">
-          <Button
-            className="header-sub-text"
-            style={{
-              color: "#FFFFFF",
-              fontSize: "18px",
-            }}
-          >
-            ASSESS DAMAGE
-          </Button> */}
-        </div>
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 }
 

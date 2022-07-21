@@ -11,11 +11,11 @@ const Gallery = ({ data, isResult }) => {
                 <div class="card-img">
                   <img
                     src={element.image}
-                    alt={element.fileName}
+                    alt={element.file_name}
                     class="img-fluid"
                   />
                 </div>
-                <h3>{element.fileName}</h3>
+                <h3>{element.file_name}</h3>
                 {isResult && (
                   <div class="card-body">
                     <div className="body" style={{ marginTop: "-55px" }}>

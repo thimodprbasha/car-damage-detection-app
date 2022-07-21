@@ -7,6 +7,7 @@ import axios from "axios";
 import Gallery from "./components/Gallery/gallery";
 
 function App() {
+  var isPreview = false;
   const [imageFiles, setImages] = useState(null);
   const [files, setFiles] = useState(null);
   const [errMsg, setMsg] = useState(null);
@@ -22,20 +23,13 @@ function App() {
   const executeScroll = () =>
     serviceRef.current.scrollIntoView({ behavior: "smooth" });
 
-  function handleChange(e) {
-    debugger;
-    console.log(e.target.files[0]);
-    // setFile(e.target.files[0]);
-    // setImage(URL.createObjectURL(e.target.files[0]));
-  }
-
   const handleFileSelected = (e) => {
     setFiles([]);
     setImages([]);
     for (let i = 0; i < e.target.files.length; i++) {
       const imgObj = {
         image: URL.createObjectURL(e.target.files[i]),
-        fileName: e.target.files[i].name,
+        file_name: e.target.files[i].name,
       };
       setFiles((fileArr) => [...fileArr, imgObj]);
       setImages((fileArr) => [...fileArr, e.target.files[i]]);
@@ -43,8 +37,20 @@ function App() {
   };
 
   const handleFileSubmition = () => {
-    files.map((e) => console.log(e));
     setPreview(true);
+  };
+
+  const handleData = (probs) => {
+    const newImgProps = probs.map((e) => {
+      const fileULR = files.find((x) => x.file_name === e.file_name);
+      console.log(fileULR);
+
+      e.image = fileULR.image;
+      return e;
+    });
+    setFiles(newImgProps);
+    isPreview = true;
+    console.log(newImgProps);
   };
 
   const handleSubmission = async () => {
@@ -60,10 +66,12 @@ function App() {
             "Content-Type": "multipart/form-data",
           },
         })
-        .then((result) => {
+        .then((result) => result.data)
+        .then((data) => {
           setLoading(false);
-          console.log(result);
-          if (result.data.error === null) {
+          setData(data);
+          handleData(data.result);
+          if (data.error === null) {
             // setReset(true);
             // setData(result.data);
           } else {
@@ -213,31 +221,45 @@ function App() {
                 and contain most of the car body in the picture.
               </p>
             </div>
-
-            {showImages ? (
+            {!isLoading ? (
               <>
-                <div className="d-flex justify-content-center ">
-                  <button className="submit-btn" onClick={handleSubmission}>
-                    Upload
-                  </button>
-                </div>
-                <Gallery data={files} isResult={false}></Gallery>
+                {showImages ? (
+                  <>
+                    <div className="d-flex justify-content-center ">
+                      <button className="submit-btn" onClick={handleSubmission}>
+                        Upload
+                      </button>
+                    </div>
+                    <Gallery data={files} isResult={true}></Gallery>
+                  </>
+                ) : (
+                  <div className="col-lg-6  d-flex flex-column justify-content-center">
+                    <div>
+                      <input
+                        className="form-control form-control-lg"
+                        type="file"
+                        multiple
+                        onChange={handleFileSelected}
+                      />
+                    </div>
+                    <div className="my-4 d-flex justify-content-center ">
+                      <button
+                        className="submit-btn"
+                        onClick={handleFileSubmition}
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
-              <div className="col-lg-6  d-flex flex-column justify-content-center">
-                <div>
-                  <input
-                    className="form-control form-control-lg"
-                    type="file"
-                    multiple
-                    onChange={handleFileSelected}
-                  />
-                </div>
-                <div className="my-4 d-flex justify-content-center ">
-                  <button className="submit-btn" onClick={handleFileSubmition}>
-                    Submit
-                  </button>
-                </div>
+              <div className="col-lg-6  d-flex  justify-content-center">
+                <div
+                  style={{ width: "4rem", height: "4rem" }}
+                  className="spinner-border text-primary"
+                  role="status"
+                ></div>
               </div>
             )}
           </div>

@@ -1,38 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./App.css";
 import { Header } from "./containers";
-import { Result } from "./components";
-import image from "./assets/image-bg.png";
 import hero_img from "./assets/image/hero-img.svg";
-import Button from "@mui/material/Button";
 import Alert from "react-bootstrap/Alert";
 import axios from "axios";
-import { Row, Col, Container, Card } from "react-bootstrap";
+import Gallery from "./components/Gallery/gallery";
 
 function App() {
-  const [file, setFile] = useState(null);
-  const [imageFile, setImage] = useState(null);
+  const [imageFiles, setImages] = useState(null);
+  const [files, setFiles] = useState(null);
   const [errMsg, setMsg] = useState(null);
   const [show, setAlert] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [reset, setReset] = useState(false);
 
+  const [showImages, setPreview] = useState(false);
+
+  const serviceRef = useRef(null);
+
+  const executeScroll = () =>
+    serviceRef.current.scrollIntoView({ behavior: "smooth" });
+
   function handleChange(e) {
-    console.log(e.target.files);
-    setFile(e.target.files[0]);
-    setImage(URL.createObjectURL(e.target.files[0]));
+    debugger;
+    console.log(e.target.files[0]);
+    // setFile(e.target.files[0]);
+    // setImage(URL.createObjectURL(e.target.files[0]));
   }
 
+  const handleFileSelected = (e) => {
+    setFiles([]);
+    setImages([]);
+    for (let i = 0; i < e.target.files.length; i++) {
+      const imgObj = {
+        image: URL.createObjectURL(e.target.files[i]),
+        fileName: e.target.files[i].name,
+      };
+      setFiles((fileArr) => [...fileArr, imgObj]);
+      setImages((fileArr) => [...fileArr, e.target.files[i]]);
+    }
+  };
+
+  const handleFileSubmition = () => {
+    files.map((e) => console.log(e));
+    setPreview(true);
+  };
+
   const handleSubmission = async () => {
-    if (file != null) {
+    if (imageFiles != null) {
       const URL = "http://127.0.0.1:5000/api/detect-car-damage";
       setAlert(false);
       setLoading(true);
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("fileName", file.name);
-
+      imageFiles.map((file) => formData.append("file", file));
       await axios
         .post(URL, formData, {
           headers: {
@@ -43,12 +64,12 @@ function App() {
           setLoading(false);
           console.log(result);
           if (result.data.error === null) {
-            setReset(true);
-            setData(result.data);
+            // setReset(true);
+            // setData(result.data);
           } else {
-            setReset(true);
-            setAlert(true);
-            setMsg(result.data.error);
+            // setReset(true);
+            // setAlert(true);
+            // setMsg(result.data.error);
           }
         })
         .catch((error) => {
@@ -167,12 +188,12 @@ function App() {
                 repaired
               </p>
               <div className="d-flex justify-content-start">
-                <button type="submit" className="btn btn-primary">
+                <button className="btn btn-primary" onClick={executeScroll}>
                   Get Started
                 </button>
               </div>
             </div>
-            <div class="col-lg-5 order-1 order-lg-2 hero-img">
+            <div className="col-lg-5 order-1 order-lg-2 hero-img">
               <img src={hero_img} className="img-fluid mb-3 mb-lg-0" alt="" />
             </div>
           </div>
@@ -181,8 +202,8 @@ function App() {
       <div className="service">
         <div className="container">
           <div className="row gy-4 d-flex justify-content-center">
-            <div className="col-lg-12 ">
-              <div class="section-header">
+            <div ref={serviceRef} className="col-lg-12 ">
+              <div className="section-header">
                 <span>Submit Damage Assessment</span>
                 <h2>Submit Damage Assessment</h2>
               </div>
@@ -193,51 +214,34 @@ function App() {
               </p>
             </div>
 
-            <div className="col-lg-6  d-flex flex-column justify-content-center">
-              <div>
-                <input
-                  class="form-control form-control-lg"
-                  id="formFileLg"
-                  type="file"
-                  multiple
-                />
+            {showImages ? (
+              <>
+                <div className="d-flex justify-content-center ">
+                  <button className="submit-btn" onClick={handleSubmission}>
+                    Upload
+                  </button>
+                </div>
+                <Gallery data={files} isResult={false}></Gallery>
+              </>
+            ) : (
+              <div className="col-lg-6  d-flex flex-column justify-content-center">
+                <div>
+                  <input
+                    className="form-control form-control-lg"
+                    type="file"
+                    multiple
+                    onChange={handleFileSelected}
+                  />
+                </div>
+                <div className="my-4 d-flex justify-content-center ">
+                  <button className="submit-btn" onClick={handleFileSubmition}>
+                    Submit
+                  </button>
+                </div>
               </div>
-              <div className="my-4 d-flex justify-content-center ">
-                <button type="submit" className="submit-btn">
-                  Submit
-                </button>
-              </div>
-            </div>
+            )}
           </div>
-          <div class="row gy-4">
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="card">
-              <div class="card-img">
-                <img src={image} alt="" class="img-fluid"/>
-              </div>
-              <h3>Storage</h3>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="card">
-              <div class="card-img">
-              <img src={image} alt="" class="img-fluid"/>
-              </div>
-              <h3>Storage</h3>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="card">
-              <div class="card-img">
-              <img src={image} alt="" class="img-fluid"/>
-              </div>
-              <h3>Storage</h3>
-            </div>
-          </div>
-        </div>
-        
-
+          {/* <Gallery image={hero_img}></Gallery> */}
         </div>
       </div>
     </>

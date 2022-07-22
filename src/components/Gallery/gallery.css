@@ -1,0 +1,49 @@
+.body {
+  text-align: center;
+  padding: 30px;
+  color: #000000;
+}
+
+.body span {
+  font-size: 14px;
+}
+
+.card {
+  width: 300px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.card img {
+  height: 200px;
+  width: 100%;
+}
+
+.line {
+  padding: 0 !important;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-grow: 1;
+  width: 100%;
+  border-top: 1px solid #0b6efd;
+}
+
+.line-div {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.line-text-result {
+  font-style: italic;
+}
+
+.wrapper {
+  overflow: auto;
+  max-height: 80vh;
+  width: 100%;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+    rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}
+.content {
+  padding: 25px;
+}

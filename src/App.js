@@ -1,140 +1,246 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./App.css";
 import { Header } from "./containers";
-import { Result } from "./components";
-import image from "./assets/image-bg.png";
-import Button from "@mui/material/Button";
-import Alert from "react-bootstrap/Alert";
+import hero_img from "./assets/image/hero-img.svg";
 import axios from "axios";
+import Gallery from "./components/Gallery/gallery";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Result from "./components/Result";
 
 function App() {
-  const [file, setFile] = useState(null);
-  const [imageFile, setImage] = useState(null);
-  const [errMsg, setMsg] = useState(null);
-  const [show, setAlert] = useState(false);
+  var isPreview = false;
+  const [imageFiles, setImages] = useState(null);
+  const [files, setFiles] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null);
-  const [reset, setReset] = useState(false);
+  const [showImages, setPreview] = useState(false);
+  const [showImageResult, setPreviewResult] = useState({
+    showResult: false,
+    err: false,
+  });
 
-  function handleChange(e) {
-    console.log(e.target.files);
-    setFile(e.target.files[0]);
-    setImage(URL.createObjectURL(e.target.files[0]));
-  }
+  const serviceRef = useRef(null);
 
-  const handleSubmission = async () => {
-    if (file != null) {
-      const URL = "http://127.0.0.1:5000/api/detect-car-damage";
-      setAlert(false);
-      setLoading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("fileName", file.name);
+  const executeScroll = () =>
+    serviceRef.current.scrollIntoView({ behavior: "smooth" });
 
-      await axios
-        .post(URL, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((result) => {
-          setLoading(false);
-          console.log(result);
-          if (result.data.error === null) {
-            setReset(true);
-            setData(result.data);
-          } else {
-            setReset(true);
-            setAlert(true);
-            setMsg(result.data.error);
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
-    } else {
-      setAlert(true);
-      setMsg("Plese add image");
+  const handleFileSelected = (e) => {
+    setFiles([]);
+    setImages([]);
+    for (let i = 0; i < e.target.files.length; i++) {
+      const imgObj = {
+        image: URL.createObjectURL(e.target.files[i]),
+        file_name: e.target.files[i].name,
+      };
+      setFiles((fileArr) => [...fileArr, imgObj]);
+      setImages((fileArr) => [...fileArr, e.target.files[i]]);
     }
   };
 
-  function refreshPage() {
-    window.location.reload(false);
-  }
+  const handleFileSubmition = () => {
+    if (files != null) {
+      setPreview(true);
+    } else {
+      toast.error("Please add a image", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
 
-  const AlertToast = ({ Message }) => {
-    return (
-      <div>
-        <Alert show={show} variant="danger" dismissible>
-          <Alert.Heading>{Message}</Alert.Heading>
-        </Alert>
-      </div>
-    );
+  const handleData = (probs) => {
+    debugger;
+    const newImgProps = probs.map((e) => {
+      const fileULR = files.find((x) => x.file_name === e.file_name);
+      console.log(fileULR);
+
+      e.image = fileULR.image;
+      return e;
+    });
+    setFiles(newImgProps);
+    isPreview = true;
+  };
+
+  const handleSubmission = async () => {
+    const URL = "http://127.0.0.1:5000/api/detect-car-damage";
+
+    const formData = new FormData();
+    imageFiles.map((file) => formData.append("file", file));
+
+    setLoading(true);
+    const pending = toast.loading("Analyzing images");
+
+    await axios
+      .post(URL, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((result) => result.data)
+      .then((data) => {
+        setLoading(false);
+        setData(data);
+        handleData(data.result);
+        if (!data.error) {
+          setPreviewResult({
+            showResult: true,
+            err: false,
+          });
+          toast.update(pending, {
+            render: "Success 👌",
+            type: "success",
+            isLoading: false,
+            autoClose: 5000,
+          });
+          setData(data);
+        } else {
+          setPreviewResult({
+            showResult: false,
+            err: true,
+          });
+          toast.update(pending, {
+            render: data.error_msg,
+            type: "error",
+            isLoading: false,
+            autoClose: 5000,
+          });
+        }
+      })
+      .catch((error) => {
+        setPreviewResult({
+          showResult: false,
+          err: true,
+        });
+        setLoading(false);
+        toast.update(pending, {
+          render: error.message,
+          type: "error",
+          autoClose: 5000,
+          isLoading: false,
+        });
+        console.error("Error:", error);
+      });
+  };
+
+  const resetPage = () => {
+    window.location.reload(false);
+    serviceRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <div className="App">
+    <>
       <Header />
-      <div className="body-div">
-        <h1 style={{ color: "#FFFFFF", textAlign: "center", padding: "40px" }}>
-          Submit Damage Assessment
-        </h1>
-        <AlertToast Message={errMsg}></AlertToast>
-        {!isLoading ? (
-          <div>
-            <img src={imageFile || image} width={500} height={400} />
-            <div className="button-upload">
-              {reset ? (
-                <div className="button-re-upload">
-                  <Button
-                    variant="contained"
-                    component="label"
-                    style={{ padding: "10px" }}
-                    onClick={refreshPage}
-                  >
-                    Reupload
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <div className="button-upload-upload">
-                    <Button
-                      variant="contained"
-                      component="label"
-                      style={{ padding: "10px" }}
-                    >
-                      Upload
-                      <input
-                        hidden
-                        accept="image/*"
-                        type="file"
-                        onChange={handleChange}
-                      />
-                    </Button>
-                  </div>
-                  <div className="button-upload-submit">
-                    <Button
-                      variant="contained"
-                      component="label"
-                      style={{ padding: "10px" }}
-                      onClick={handleSubmission}
-                    >
-                      Submit
-                    </Button>
-                  </div>
-                </>
-              )}
+      <ToastContainer />
+      <div className="hero">
+        <div className="container">
+          <div className="row gy-4 d-flex justify-content-between">
+            <div className="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center">
+              <h2>Submit Damage Assessment</h2>
+              <p>
+                Car Damage Detective allows you to upload a picture of your car
+                damage to indepently assess damage location and severity, easing
+                the burden of filing an insurance claim and getting your car
+                repaired
+              </p>
+              <div className="d-flex justify-content-start">
+                <button className="btn btn-primary" onClick={executeScroll}>
+                  Get Started
+                </button>
+              </div>
+            </div>
+            <div className="col-lg-5 order-1 order-lg-2 hero-img">
+              <img src={hero_img} className="img-fluid mb-3 mb-lg-0" alt="" />
             </div>
           </div>
-        ) : (
-          <div className="spinner-container">
-            <div className="loading-spinner"></div>
-          </div>
-        )}
-
-        {data && <Result Result={data} />}
+        </div>
       </div>
-    </div>
+      <div className="service">
+        <div className="container">
+          <div className="row gy-4 d-flex justify-content-center">
+            <div ref={serviceRef} className="col-lg-12 ">
+              <div className="section-header">
+                <span>Submit Damage Assessment</span>
+                <h2>Submit Damage Assessment</h2>
+              </div>
+              {showImageResult.showResult ? (
+                <Result data={data}></Result>
+              ) : (
+                <p>
+                  Take a picture of your car damage. For best results, try to
+                  focus on one major area of damage (e.g., front, side, or rear)
+                  and contain most of the car body in the picture.
+                </p>
+              )}
+
+              {/* {data && <Result data={data}></Result>} */}
+            </div>
+
+            {!isLoading ? (
+              <>
+                {showImages ? (
+                  <>
+                    <div className="d-flex justify-content-center ">
+                      <button
+                        className="submit-btn"
+                        onClick={
+                          showImageResult.showResult || showImageResult.err
+                            ? resetPage
+                            : handleSubmission
+                        }
+                      >
+                        {showImageResult.showResult || showImageResult.err
+                          ? "Restart"
+                          : "Upload"}
+                      </button>
+                    </div>
+
+                    <Gallery
+                      data={files}
+                      isResult={showImageResult.showResult}
+                      err={showImageResult.err}
+                    ></Gallery>
+                  </>
+                ) : (
+                  <div className="col-lg-6  d-flex flex-column justify-content-center">
+                    <div>
+                      <input
+                        className="form-control form-control-lg"
+                        type="file"
+                        multiple
+                        onChange={handleFileSelected}
+                      />
+                    </div>
+                    <div className="my-4 d-flex justify-content-center ">
+                      <button
+                        className="submit-btn"
+                        onClick={handleFileSubmition}
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="col-lg-6  d-flex  justify-content-center">
+                <div
+                  style={{ width: "4rem", height: "4rem" }}
+                  className="spinner-border text-primary"
+                  role="status"
+                ></div>
+              </div>
+            )}
+          </div>
+          {/* <Gallery image={hero_img}></Gallery> */}
+        </div>
+      </div>
+    </>
   );
 }
 

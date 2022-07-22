@@ -1,13 +1,13 @@
 import "./gallery.css";
 
-const Gallery = ({ data, isResult }) => {
+const Gallery = ({ data, isResult  , err}) => {
   return (
     <div className="wrapper">
       <div className="content">
         <div className="row gy-4">
           {data.map((element) => (
             <div class="col-lg-3 col-md-6">
-              <div class="card">
+              <div class="card" style={ err ? {"borderColor" : "red"} : null}>
                 <div class="card-img">
                   <img
                     src={element.image}

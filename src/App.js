@@ -204,6 +204,7 @@ function App() {
                       data={files}
                       isResult={showImageResult.showResult}
                       err={showImageResult.err}
+                      state={setFiles}
                     ></Gallery>
                   </>
                 ) : (

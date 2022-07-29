@@ -55,7 +55,6 @@ function App() {
   };
 
   const handleData = (probs) => {
-    debugger;
     const newImgProps = probs.map((e) => {
       const fileULR = files.find((x) => x.file_name === e.file_name);
       console.log(fileULR);
